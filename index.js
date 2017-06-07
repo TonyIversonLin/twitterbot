@@ -6,7 +6,7 @@ const fs = require('fs');
 
 let T = new Twit(config);
 
-//get and post tweet --------------------------------------------------------
+//get and post tweet -------------------------------------------------------------------------------------
 function getTweet(keyword) {
 	T.get('search/tweets', { q: `${keyword} since:2017-06-01`, count: 10 }, function(err, data, response) {
 	  let tweets = data.statuses.map(message => message.text);
@@ -17,13 +17,13 @@ function getTweet(keyword) {
 
 function postTweet(tweet) {
 	T.post('statuses/update', tweet, function(err, data, response) {
-	  err ? console.log('something went wrong') : console.log('operation success')
+	  err ? console.log('something went wrong',err) : console.log('operation success')
 	}); 
 }
 //postTweet({status: 'hello world!'});
 
 
-//Tweet in a time intervel -----------------------------------
+//Tweet in a time intervel --------------------------------------------------------------------------------
 function randomTweet() {
 	let randomMessage = Math.floor(Math.random() * 100);
 	let tweet = {
@@ -35,8 +35,7 @@ function randomTweet() {
 //setInterval(randomTweet, 1000 * 10);
 
 
-// tweet image-------------------------------------------------------------------------------------
-let imagePath = './img/coding2.jpg';
+// tweet image----------------------------------------------------------------------------------------------
 function imageTweet(image) {
 	let b64content = fs.readFileSync(image, { encoding: 'base64' });
 
@@ -45,7 +44,22 @@ function imageTweet(image) {
   	postTweet(meta_params);
 	})
 }
-imageTweet(imagePath);
+//let imagePath = './img/coding2.jpg';
+//imageTweet(imagePath);
 
 
-// tweetbot reply----------------------------------------------------------------------------------
+// tweetbot reply-------------------------------------------------------------------------------------------
+let stream = T.stream('user');
+function tweetReply(eventMsg) {
+
+	let replyto = eventMsg.in_reply_to_screen_name;
+	let text = eventMsg.text;
+	let fromUser = eventMsg.user.screen_name;
+
+	if(replyto === 'LINYECHAO') {
+		console.log('about to reply tweet',fromUser);
+		let newTweet ={status: '@' + fromUser + ' thanks for tweeting me!'};
+		postTweet(newTweet);
+	}
+}
+stream.on('tweet', tweetReply);
