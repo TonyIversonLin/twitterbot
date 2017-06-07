@@ -49,7 +49,7 @@ function imageTweet(image) {
 
 
 // tweetbot reply-------------------------------------------------------------------------------------------
-let stream = T.stream('user');
+//let stream = T.stream('user');
 function tweetReply(eventMsg) {
 
 	let replyto = eventMsg.in_reply_to_screen_name;
@@ -62,4 +62,27 @@ function tweetReply(eventMsg) {
 		postTweet(newTweet);
 	}
 }
-stream.on('tweet', tweetReply);
+//stream.on('tweet', tweetReply);
+
+
+
+//tweetbot get public user tweets-----------------------------------
+function tweetGetPublicUser(name) {
+	T.get('statuses/user_timeline', {screen_name: `${name}`, count: 3}, (err, data, response) => {
+		err ? console.log('something went wrong',err) : console.log('operation success');
+		let tweets = data.map(message => message.text);
+	  console.log(tweets);
+	})
+} 
+//tweetGetPublicUser('POTUS');
+
+
+
+//tweetbot streaming tweet from certain user------------------------------
+let watchList = {follow: ['1059621480', '872491740619472897']}
+let streamWatch = T.stream('statuses/filter', watchList);
+function watchUserTweet(eventMsg, err) {
+	err ? console.log('something went wrong',err) : console.log('operation success');
+	console.log('new tweet from watched user ---------------- \n',eventMsg);
+}
+streamWatch.on('tweet', watchUserTweet);
